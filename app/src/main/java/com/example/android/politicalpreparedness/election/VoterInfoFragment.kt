@@ -1,5 +1,7 @@
 package com.example.android.politicalpreparedness.election
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.*
@@ -11,14 +13,17 @@ import com.example.android.politicalpreparedness.R
 import com.example.android.politicalpreparedness.database.ElectionDatabase
 import com.example.android.politicalpreparedness.databinding.FragmentVoterInfoBinding
 import com.example.android.politicalpreparedness.repository.ElectionRepository
+import com.example.android.politicalpreparedness.utils.Utils
 
 class VoterInfoFragment : Fragment() {
 
     private lateinit var viewModel: VoterInfoViewModel
+    private lateinit var binding: FragmentVoterInfoBinding
+    private lateinit var voterInfoFragmentArgs: VoterInfoFragmentArgs
     override fun onCreateView(inflater: LayoutInflater,
                               container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        var binding = FragmentVoterInfoBinding.inflate(inflater)
+        binding = FragmentVoterInfoBinding.inflate(inflater)
         val database = ElectionDatabase.getInstance(this.requireContext())
         val voterInfoFragmentArgs by navArgs<VoterInfoFragmentArgs>()
         val voterInfoViewModelFactory = VoterInfoViewModelFactory(this.requireContext(),
@@ -27,11 +32,10 @@ class VoterInfoFragment : Fragment() {
         binding.lifecycleOwner = this
         binding.viewmodel = viewModel
 
-        viewModel.getVoterInfo()
+        viewModel.getVoterInfo(requireContext())
 
-        viewModel.checkStatus(voterInfoFragmentArgs.argElectionId).observe(viewLifecycleOwner, Observer {
+        viewModel.checkStatus().observe(viewLifecycleOwner, Observer {
             it?.let {
-                Log.d("okkk222", it.toString())
                 if (it){
                     binding.followElectionButton.text = getString(R.string.unfollow_txt)
                 }else{
@@ -39,6 +43,40 @@ class VoterInfoFragment : Fragment() {
                 }
             }
         })
+
+        viewModel.eventOpenUrl.observe(viewLifecycleOwner, Observer { url->
+            if(url.isNotEmpty()){
+                openWebPage(url)
+                viewModel.onOpenUrlComplete()
+            }
+        })
+
+        viewModel.showErrorMessage.observe(viewLifecycleOwner, Observer {
+            it.let {
+                Utils.useSnackBar(requireActivity().findViewById(android.R.id.content), it)
+            }
+        })
+
+        viewModel.status.observe(viewLifecycleOwner, Observer {
+            it.let {
+                when(it){
+                    VoterInfoViewModel.VoterInfoAPIStatus.LOADING -> binding.showLoading.visibility = View.VISIBLE
+
+                    VoterInfoViewModel.VoterInfoAPIStatus.DONE ->{
+                        binding.showLoading.visibility = View.GONE
+                        binding.followElectionButton.visibility = View.VISIBLE
+                        binding.stateBallot.visibility = View.VISIBLE
+                        binding.stateLocations.visibility = View.VISIBLE
+                    }
+                    VoterInfoViewModel.VoterInfoAPIStatus.ERROR-> {
+                        binding.showLoading.visibility = View.GONE
+                        Utils.useSnackBar(requireActivity().findViewById(android.R.id.content), getString(R.string.loading_error))
+                    }
+                }
+            }
+        })
+
+
 
 
         //TODO: Add ViewModel values and create ViewModel
@@ -58,6 +96,14 @@ class VoterInfoFragment : Fragment() {
 
         return binding.root
 
+    }
+
+    fun openWebPage(url: String) {
+        val webpage: Uri = Uri.parse(url)
+        val intent = Intent(Intent.ACTION_VIEW, webpage)
+        if (intent.resolveActivity(requireActivity().packageManager) != null) {
+            startActivity(intent)
+        }
     }
 
     //TODO: Create method to load URL intents

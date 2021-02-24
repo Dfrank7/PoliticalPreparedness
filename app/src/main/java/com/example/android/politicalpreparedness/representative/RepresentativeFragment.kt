@@ -25,6 +25,7 @@ import com.example.android.politicalpreparedness.BuildConfig
 import com.example.android.politicalpreparedness.databinding.FragmentRepresentativeBinding
 import com.example.android.politicalpreparedness.network.models.Address
 import com.example.android.politicalpreparedness.representative.adapter.RepresentativeListAdapter
+import com.example.android.politicalpreparedness.representative.adapter.RepresentativeListener
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import com.google.android.gms.tasks.Task
@@ -32,7 +33,7 @@ import com.google.android.material.snackbar.Snackbar
 import timber.log.Timber
 import java.util.Locale
 
-class DetailFragment : Fragment() {
+class DetailFragment : Fragment(), RepresentativeListener {
 
     companion object {
         private val REQUEST_CODE_FOREANDBACKGROUND = 1
@@ -57,7 +58,7 @@ class DetailFragment : Fragment() {
         binding.viewModel = viewModel
         fusedLocationProviderClient =
                 LocationServices.getFusedLocationProviderClient(requireActivity())
-        adapter = RepresentativeListAdapter()
+        adapter = RepresentativeListAdapter(this)
         binding.recyclerRepresentatives.adapter = adapter
         binding.buttonSearch.setOnClickListener {
             //Timber.d("searching...")
@@ -104,29 +105,21 @@ class DetailFragment : Fragment() {
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (
-                grantResults.isEmpty() ||
-                grantResults[0] == PackageManager.PERMISSION_DENIED ||
-                (requestCode == REQUEST_CODE_FOREANDBACKGROUND &&
-                        grantResults[1] ==
-                        PackageManager.PERMISSION_DENIED)
-        ) {
-            Snackbar.make(
-                    requireView(),
-                    "Permission Denied",
-                    Snackbar.LENGTH_LONG
-            )
-                    .setAction("Settings") {
-                        startActivity(Intent().apply {
-                            action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
-                            data = Uri.fromParts("package", BuildConfig.APPLICATION_ID, null)
-                            flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                        })
+        when(requestCode) {
+            REQUEST_CODE_FOREANDBACKGROUND->
+            if (grantResults.isNotEmpty() || grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                checkLocationSettings()
+            } else {
+                Snackbar.make(requireView(), "Permission Denied", Snackbar.LENGTH_LONG)
+                        .setAction("Settings") {
+                            startActivity(Intent().apply {
+                                action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                                data = Uri.fromParts("package", BuildConfig.APPLICATION_ID, null)
+                                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                            })
 
-                        //_viewModel.navigationCommand.value = NavigationCommand.Back
-                    }.show()
-        }else{
-            checkLocationSettings()
+                        }.show()
+            }
         }
         //TODO: Handle location permission result to get location on permission granted
     }
@@ -288,6 +281,14 @@ class DetailFragment : Fragment() {
     private fun hideKeyboard() {
         val imm = activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(view!!.windowToken, 0)
+    }
+
+    override fun openUrl(url: String) {
+        val webpage: Uri = Uri.parse(url)
+        val intent = Intent(Intent.ACTION_VIEW, webpage)
+        if (intent.resolveActivity(requireActivity().packageManager) != null) {
+            startActivity(intent)
+        }
     }
 
 }

@@ -1,11 +1,8 @@
 package com.example.android.politicalpreparedness.repository
 
-import android.content.Context
-import com.example.android.politicalpreparedness.Utils
 import com.example.android.politicalpreparedness.database.ElectionDatabase
 import com.example.android.politicalpreparedness.network.CivicsApi
 import com.example.android.politicalpreparedness.network.models.Election
-import com.example.android.politicalpreparedness.network.models.RepresentativeResponse
 import com.example.android.politicalpreparedness.network.models.VoterInfoResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -42,9 +39,12 @@ class ElectionRepository(val database: ElectionDatabase) {
         database.electionDao.insert(election)
     }
 
-    suspend fun checkElection(id: Int) : Boolean{
+    fun checkElection(id: Int) : Boolean{
        val election = database.electionDao.getElection(id)
-        return election?.id != -1
+        election?.let {
+            return !election!!.name.isNullOrEmpty()
+        }
+        return false
     }
 
     suspend fun deleteElection(electionId: Int){

@@ -14,6 +14,10 @@
     <string name="www_icon">Web</string>
     <string name="find_rep_txt">Find My Representatives</string>
     <string name="location_txt">Use My Location</string>
+    <string name="loading_error">Error Loading Election</string>
+    <string name="internet_error_message">No Internet Connection</string>
+    <string name="loading_voter_info">Oops...Couldn\'t get voters Information</string>
+    <string name="state">State</string>
 
     <!-- TODO: Add necessary string values -->
 

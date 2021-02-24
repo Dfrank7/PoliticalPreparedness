@@ -9,6 +9,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.example.android.politicalpreparedness.R
+import com.example.android.politicalpreparedness.utils.Utils
 import com.example.android.politicalpreparedness.database.ElectionDatabase
 import com.example.android.politicalpreparedness.databinding.FragmentElectionBinding
 import com.example.android.politicalpreparedness.election.adapter.ElectionListAdapter
@@ -64,6 +65,28 @@ class ElectionsFragment: Fragment() {
             }
         })
 
+        viewModel.status.observe(viewLifecycleOwner, Observer {
+            it.let {
+                when(it){
+                    ElectionsViewModel.ElectionAPIStatus.LOADING -> binding.statusLoadingWheel.visibility = View.VISIBLE
+                    ElectionsViewModel.ElectionAPIStatus.DONE -> binding.statusLoadingWheel.visibility = View.GONE
+                    ElectionsViewModel.ElectionAPIStatus.ERROR-> {
+                        binding.statusLoadingWheel.visibility = View.GONE
+                        Utils.useSnackBar(requireActivity().findViewById(android.R.id.content), getString(R.string.loading_error))
+                    }
+                }
+            }
+        })
+
+        viewModel.checkInternet.observe(viewLifecycleOwner, Observer {
+            it.let {
+                if (it.equals(false)){
+                    Utils.useSnackBar(requireActivity().findViewById(android.R.id.content),
+                            getString(R.string.internet_error_message))
+                }
+            }
+        })
+
         //TODO: Add ViewModel values and create ViewModel
 
         //TODO: Add binding values
@@ -75,6 +98,11 @@ class ElectionsFragment: Fragment() {
         //TODO: Populate recycler adapters
 
         return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        viewModel.refresh()
     }
 
     //TODO: Refresh adapters when fragment loads

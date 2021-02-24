@@ -16,7 +16,7 @@ import com.example.android.politicalpreparedness.databinding.RepresentativeItemB
 import com.example.android.politicalpreparedness.network.models.Channel
 import com.example.android.politicalpreparedness.representative.model.Representative
 
-class RepresentativeListAdapter: ListAdapter<Representative, RepresentativeViewHolder>(RepresentativeDiffCallback()){
+class RepresentativeListAdapter(val listener: RepresentativeListener): ListAdapter<Representative, RepresentativeViewHolder>(RepresentativeDiffCallback()){
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RepresentativeViewHolder {
         return RepresentativeViewHolder.from(parent)
@@ -35,13 +35,13 @@ class RepresentativeListAdapter: ListAdapter<Representative, RepresentativeViewH
 
     override fun onBindViewHolder(holder: RepresentativeViewHolder, position: Int) {
         val item = getItem(position)
-        holder.bind(item)
+        holder.bind(item, listener)
     }
 }
 
 class RepresentativeViewHolder(val binding: RepresentativeItemBinding): RecyclerView.ViewHolder(binding.root) {
 
-    fun bind(item: Representative) {
+    fun bind(item: Representative, listener: RepresentativeListener) {
         binding.representative = item
         val channels = item.official.channels
         val urls = item.official.urls
@@ -52,21 +52,21 @@ class RepresentativeViewHolder(val binding: RepresentativeItemBinding): Recycler
             binding.facebookIcon.setOnClickListener {
                 val fbUrl = getFacebookUrl(channel)
                 fbUrl?.let { fb ->
-                  //  representativeListener.openUrl(fb)
+                    listener.openUrl(fb)
                 }
             }
 
             binding.twitterIcon.setOnClickListener {
                 val twitterUrl = getTwitterUrl(channel)
                 twitterUrl?.let { twitter ->
-                   // representativeListener.openUrl(twitter)
+                   listener.openUrl(twitter)
                 }
             }
         }
         urls?.let { urlList ->
             showWWWLinks(urlList)
             binding.wwwIcon.setOnClickListener {
-                //representativeListener.openUrl(urlList.first())
+                listener.openUrl(urlList.first())
             }
         }
 
@@ -121,6 +121,9 @@ class RepresentativeViewHolder(val binding: RepresentativeItemBinding): Recycler
         itemView.context.startActivity(intent)
     }
 
+}
+interface RepresentativeListener {
+    fun openUrl(url: String)
 }
 
 //TODO: Create RepresentativeDiffCallback

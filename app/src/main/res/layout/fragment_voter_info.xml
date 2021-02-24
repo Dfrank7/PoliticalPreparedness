@@ -14,19 +14,11 @@
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/voter_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context="com.example.android.politicalpreparedness.MainActivity">
 
-        <ProgressBar
-            android:id="@+id/pb_loading"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
 
         <!-- TODO: Add title to toolbar -->
         <androidx.appcompat.widget.Toolbar
@@ -34,9 +26,21 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="@dimen/default_padding"
+            app:titleTextColor="@color/white"
             tools:title = "Title"
+            android:background="@color/colorPrimary"
             app:title="@{viewmodel.voterInfo.election.name}"
             android:singleLine="true"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ProgressBar
+            android:id="@+id/show_loading"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <!-- TODO: Add visual styling -->
@@ -53,6 +57,8 @@
         <TextView
             android:id="@+id/state_header"
             android:layout_width="wrap_content"
+            android:visibility="invisible"
+            android:text="@string/state"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toBottomOf="@id/election_date"
             app:layout_constraintStart_toStartOf="@id/election_date" />
@@ -63,7 +69,9 @@
             android:id="@+id/state_locations"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:onClick="@{()->viewmodel.votingLocationSelected()}"
             android:text="@string/voting_locations"
+            android:visibility="invisible"
             app:layout_constraintTop_toBottomOf="@id/state_header"
             app:layout_constraintStart_toStartOf="@id/election_date" />
 
@@ -74,6 +82,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/state_bal"
+            android:visibility="invisible"
+            android:onClick="@{()->viewmodel.ballotInfoSelected()}"
             app:layout_constraintTop_toBottomOf="@id/state_locations"
             app:layout_constraintStart_toStartOf="@id/election_date" />
 
@@ -99,6 +109,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@{viewmodel.stateAddress}"
+            android:visibility="@{viewmodel.stateAddress.empty?View.GONE: View.VISIBLE}"
             app:layout_constraintTop_toBottomOf="@id/state_correspondence_header"
             app:layout_constraintStart_toStartOf="@id/election_date" />
 
@@ -109,7 +120,10 @@
             android:id="@+id/followElectionButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:visibility="invisible"
             android:layout_marginStart="16dp"
+            android:background="@color/colorPrimary"
+            android:textColor="@color/white"
             android:layout_marginEnd="16dp"
             android:onClick="@{()->viewmodel.savedOrDeleteElection(viewmodel.voterInfo.election)}"
             android:text="@string/follow_elect"
