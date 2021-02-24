@@ -18,6 +18,7 @@
     <string name="internet_error_message">No Internet Connection</string>
     <string name="loading_voter_info">Oops...Couldn\'t get voters Information</string>
     <string name="state">State</string>
+    <string name="loading_error_rep">Error Loading Representatives</string>
 
     <!-- TODO: Add necessary string values -->
 

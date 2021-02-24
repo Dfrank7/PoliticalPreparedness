@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.android.politicalpreparedness.election.VoterInfoViewModel
 import com.example.android.politicalpreparedness.network.models.Address
 import com.example.android.politicalpreparedness.representative.model.Representative
 import kotlinx.coroutines.launch
@@ -18,6 +19,9 @@ class RepresentativeViewModel(val repRepository: RepRepository): ViewModel() {
     private val _address = MutableLiveData<Address>()
     val address: LiveData<Address>
         get() = _address
+    private val _status = MutableLiveData<RepAPIStatus>()
+    val status: LiveData<RepAPIStatus> get() = _status
+
 
     //TODO: Create function to fetch representatives from API from a provided address
 
@@ -35,13 +39,22 @@ class RepresentativeViewModel(val repRepository: RepRepository): ViewModel() {
     fun getRepresentative(address: String){
         viewModelScope.launch {
             try {
+                _status.value = RepAPIStatus.LOADING
                 val(offices, officials) =repRepository.getRepresentatives(address)
                 _repList.value = offices.flatMap { office -> office.getRepresentatives(officials) }
             }catch (e: Exception){
+                _status.value = RepAPIStatus.ERROR
                 e.printStackTrace()
-
+            }finally {
+                _status.value = RepAPIStatus.DONE
             }
         }
+    }
+
+    enum class RepAPIStatus {
+        LOADING,
+        ERROR,
+        DONE
     }
 
     /**

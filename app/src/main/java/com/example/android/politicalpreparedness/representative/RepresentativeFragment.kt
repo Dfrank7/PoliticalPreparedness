@@ -22,10 +22,12 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
 import com.example.android.politicalpreparedness.BuildConfig
+import com.example.android.politicalpreparedness.R
 import com.example.android.politicalpreparedness.databinding.FragmentRepresentativeBinding
 import com.example.android.politicalpreparedness.network.models.Address
 import com.example.android.politicalpreparedness.representative.adapter.RepresentativeListAdapter
 import com.example.android.politicalpreparedness.representative.adapter.RepresentativeListener
+import com.example.android.politicalpreparedness.utils.Utils
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import com.google.android.gms.tasks.Task
@@ -88,6 +90,19 @@ class DetailFragment : Fragment(), RepresentativeListener {
         viewModel.address.observe(viewLifecycleOwner, Observer {
             it?.let {
                 viewModel.getRepresentatives(it)
+            }
+        })
+
+        viewModel.status.observe(viewLifecycleOwner, Observer {
+            it.let {
+                when(it){
+                    RepresentativeViewModel.RepAPIStatus.LOADING -> binding.repLoadingBar.visibility = View.VISIBLE
+                    RepresentativeViewModel.RepAPIStatus.DONE->binding.repLoadingBar.visibility = View.GONE
+                    RepresentativeViewModel.RepAPIStatus.ERROR->{
+                        binding.repLoadingBar.visibility = View.GONE
+                        Utils.useSnackBar(requireActivity().findViewById(android.R.id.content), getString(R.string.loading_error_rep))
+                    }
+                }
             }
         })
 
