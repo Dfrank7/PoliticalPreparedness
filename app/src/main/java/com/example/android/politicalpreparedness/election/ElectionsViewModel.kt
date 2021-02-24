@@ -16,6 +16,9 @@ class ElectionsViewModel(context : Context, private val electionRepository: Elec
     private val _upcomingElection = MutableLiveData<List<Election>>()
     val upcomingElection : LiveData<List<Election>>
     get() = _upcomingElection
+    private val _savedElection = MutableLiveData<List<Election>>()
+    val savedElection : LiveData<List<Election>>
+    get() = _savedElection
     private val _navigateToVoterInfo = MutableLiveData<Election>()
     val navigateToVoterInfo : LiveData<Election>
     get() = _navigateToVoterInfo
@@ -28,6 +31,7 @@ class ElectionsViewModel(context : Context, private val electionRepository: Elec
         viewModelScope.launch {
             try {
                 _upcomingElection.value = electionRepository.getUpcominElectionOnline()
+                _savedElection.value = electionRepository.getSavedElections()
             }catch (e:Exception){
                 e.printStackTrace()
             }

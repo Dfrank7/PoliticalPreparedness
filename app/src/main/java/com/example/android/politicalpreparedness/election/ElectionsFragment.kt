@@ -9,6 +9,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.example.android.politicalpreparedness.R
+import com.example.android.politicalpreparedness.database.ElectionDatabase
 import com.example.android.politicalpreparedness.databinding.FragmentElectionBinding
 import com.example.android.politicalpreparedness.election.adapter.ElectionListAdapter
 import com.example.android.politicalpreparedness.repository.ElectionRepository
@@ -16,28 +17,43 @@ import com.example.android.politicalpreparedness.repository.ElectionRepository
 class ElectionsFragment: Fragment() {
 
     //TODO: Declare ViewModel
+//    val database = ElectionDatabase.getInstance(this.requireContext())
+    lateinit var database: ElectionDatabase
     private val viewModel : ElectionsViewModel by lazy {
-        ViewModelProvider(this, ElectionsViewModelFactory(this.requireContext(), ElectionRepository())).get(ElectionsViewModel::class.java)
+        ViewModelProvider(this, ElectionsViewModelFactory(this.requireContext(), ElectionRepository(database))).get(ElectionsViewModel::class.java)
     }
 
     override fun onCreateView(inflater: LayoutInflater,
                               container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
+        database = ElectionDatabase.getInstance(this.requireContext())
 
         val binding = FragmentElectionBinding.inflate(inflater)
         binding.lifecycleOwner = this
         binding.viewmodel = viewModel
 
-        val adapter = ElectionListAdapter(ElectionListAdapter.ElectionListener{
+        val upcomingAdapter = ElectionListAdapter(ElectionListAdapter.ElectionListener{
             it?.let {
                 viewModel.onElectionClicked(it)
             }
         })
-        binding.recyclerUpcoming.adapter = adapter
+        val savedAdapter = ElectionListAdapter(ElectionListAdapter.ElectionListener{
+            it?.let {
+                viewModel.onElectionClicked(it)
+            }
+        })
+        binding.recyclerUpcoming.adapter = upcomingAdapter
+        binding.recyclerSaved.adapter = savedAdapter
 
         viewModel.upcomingElection.observe(viewLifecycleOwner, Observer {
             it.let {
-                adapter.submitList(it)
+                upcomingAdapter.submitList(it)
+            }
+        })
+
+        viewModel.savedElection.observe(viewLifecycleOwner, Observer {
+            it.let {
+                savedAdapter.submitList(it)
             }
         })
 

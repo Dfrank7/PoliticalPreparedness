@@ -4,6 +4,16 @@
     <string name="upcoming_text">Upcoming Elections</string>
     <string name="rep_text">FIND MY REPRESENTATIVES</string>
     <string name="saved_elections">Saved Elections</string>
+    <string name="state_bal">Ballot Information</string>
+    <string name="voting_locations">Voting Locations</string>
+    <string name="state_corr_text">State Correspondence</string>
+    <string name="follow_elect">Follow Election</string>
+    <string name="unfollow_txt">Unfollow Election</string>
+    <string name="facebook_icon">Facebook</string>
+    <string name="twitter_icon">Twitter</string>
+    <string name="www_icon">Web</string>
+    <string name="find_rep_txt">Find My Representatives</string>
+    <string name="location_txt">Use My Location</string>
 
     <!-- TODO: Add necessary string values -->
 
